@@ -4,20 +4,20 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include <vector>
+#include <algorithm>
 
 #include <afina/Storage.h>
 
 namespace Afina {
 namespace Backend {
-
-/**
- * # Map based implementation with global lock
- *
- *
- */
-class MapBasedGlobalLockImpl : public Afina::Storage {
+    
+    
+class MapBasedGlobalLockImpl : public Afina::Storage
+{
 public:
-    MapBasedGlobalLockImpl(size_t max_size = 1024) : _max_size(max_size) {}
+    MapBasedGlobalLockImpl(size_t max_size = 1024) : _max_size(max_size), storage(1024) {}
+    
     ~MapBasedGlobalLockImpl() {}
 
     // Implements Afina::Storage interface
@@ -34,8 +34,10 @@ public:
 
     // Implements Afina::Storage interface
     bool Get(const std::string &key, std::string &value) const override;
+    
 
 private:
+    std::vector<std::string> storage;
     std::mutex _lock;
 
     size_t _max_size;
@@ -47,3 +49,4 @@ private:
 } // namespace Afina
 
 #endif // AFINA_STORAGE_MAP_BASED_GLOBAL_LOCK_IMPL_H
+
