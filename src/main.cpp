@@ -11,7 +11,7 @@
 
 #include <afina/Storage.h>
 #include <afina/Version.h>
-//#include <afina/network/Server.h>
+#include <afina/network/Server.h>
 
 #include "network/blocking/ServerImpl.h"
 #include "network/uv/ServerImpl.h"
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
     if (Afina::Version_SHA.size() > 0) {
         app_string << "-" << Afina::Version_SHA;
     }
-    
+
     // Command line arguments parsing
     cxxopts::Options options("afina", "Simple memory caching server");
     try {
@@ -61,7 +61,6 @@ int main(int argc, char **argv) {
         options.add_options()("p,pid", "Print PID to file specified by filename", cxxopts::value<std::string>());
         options.add_options()("d,daemon", "Run application as daemon");
         options.parse(argc, argv);
-        
         if (options.count("help") > 0) {
             std::cerr << options.help() << std::endl;
             return 0;
@@ -70,29 +69,28 @@ int main(int argc, char **argv) {
         std::cerr << "Error: " << ex.what() << std::endl;
         return 1;
     }
-    
     // Start boot sequence
     Application app;
     std::cout << "Starting " << app_string.str() << std::endl;
-    
+
     // Build new storage instance
     std::string storage_type = "map_global";
     if (options.count("storage") > 0) {
         storage_type = options["storage"].as<std::string>();
     }
-    
+
     if (storage_type == "map_global") {
         app.storage = std::make_shared<Afina::Backend::MapBasedGlobalLockImpl>();
     } else {
         throw std::runtime_error("Unknown storage type");
     }
-    
+
     // Build  & start network layer
     std::string network_type = "uv";
     if (options.count("network") > 0) {
         network_type = options["network"].as<std::string>();
     }
-    
+
     if (network_type == "uv") {
         app.server = std::make_shared<Afina::Network::UV::ServerImpl>(app.storage);
     } else if (network_type == "blocking") {
@@ -101,9 +99,9 @@ int main(int argc, char **argv) {
         throw std::runtime_error("Unknown network type");
     }
 
-    if (start_daemon(options)==0) return 0;  //
+    if (start_daemon(options)==0) return 0;
     
-    pid_to_file(options);  //
+    pid_to_file(options);
     
     // Init local loop. It will react to signals and performs some metrics collections. Each
     // subsystem is able to push metrics actively, but some metrics could be collected only
