@@ -78,7 +78,7 @@ bool MapBasedGlobalLockImpl::Delete(const std::string &key)
 // See MapBasedGlobalLockImpl.h
     bool MapBasedGlobalLockImpl::Get(const std::string &key, std::string &value) const
 {
-    std::unique_lock<std::mutex> guard(_lock);
+    std::unique_lock<std::mutex> guard(*const_cast<std::mutex *>(&_lock));
 
     std::hash<std::string> hash_function;
     size_t str_hash = hash_function(key) % 1000;
